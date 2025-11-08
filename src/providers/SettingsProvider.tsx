@@ -4,6 +4,7 @@ import {
   SettingsContext,
   SettingsContextValue,
   defaultSettings,
+  Settings,
 } from './SettingsContext'
 
 const SETTINGS_STORAGE_KEY = 'jambosec_settings'
@@ -39,7 +40,7 @@ export const SettingsProvider = ({ children }: PropsWithChildren) => {
   }, [settings])
 
   const setLocale = useCallback((locale: string) => {
-    setSettings((current) => {
+    setSettings((current: Settings) => {
       const updated = { ...current, locale }
       saveSettings(updated)
       return updated

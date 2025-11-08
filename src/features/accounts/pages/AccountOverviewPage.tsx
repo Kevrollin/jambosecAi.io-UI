@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AccountProfileCard } from '../components/AccountProfileCard'
 import { useCurrentAccount } from '../hooks/useCurrentAccount'
 import { useAuth } from '../context/AuthContext'
 import { useNavbar } from '../../../components/NavbarContext'

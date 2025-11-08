@@ -1,8 +1,7 @@
-import { useCallback, useState } from 'react'
+import { useCallback } from 'react'
 import { useAsyncValue } from '../../../hooks/useAsyncValue'
 import { KnowledgeList } from '../components/KnowledgeList'
 import {
-  ingestKnowledge,
   listKnowledgeDocuments,
   listKnowledgeSources,
 } from '../services/knowledgeService'
@@ -18,13 +17,6 @@ export const KnowledgeBasePage = () => {
   }, [])
 
   const dataState = useAsyncValue(loadKnowledgeBase)
-
-  const [ingestionResult, setIngestionResult] = useState<string | null>(null)
-
-  const handleIngest = useCallback(async () => {
-    const response = await ingestKnowledge({ sourceId: 'default', url: 'https://example.com' })
-    setIngestionResult(response.jobId)
-  }, [])
 
   const sources = dataState.data?.sources ?? []
   const documents = dataState.data?.documents ?? []
@@ -51,21 +43,6 @@ export const KnowledgeBasePage = () => {
       )}
 
       <KnowledgeList documents={documents} sources={sources} />
-
-      <section
-        aria-label="Ingestion"
-        className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
-      >
-        <button
-          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500"
-          onClick={handleIngest}
-        >
-          Run ingestion command
-        </button>
-        {ingestionResult && (
-          <p className="mt-3 text-sm text-slate-600">Ingestion job ID: {ingestionResult}</p>
-        )}
-      </section>
     </section>
   )
 }

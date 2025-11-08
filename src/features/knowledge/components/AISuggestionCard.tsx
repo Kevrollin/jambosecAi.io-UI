@@ -1,6 +1,4 @@
-import { Link } from 'react-router-dom'
 import { AIGeneratedSuggestion } from '../types'
-import { paths } from '../../../routes/paths'
 import { GuideCard } from './GuideCard'
 
 interface AISuggestionCardProps {

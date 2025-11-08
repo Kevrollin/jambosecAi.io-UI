@@ -132,9 +132,9 @@ export const submitGuideFeedback = async (
 
 // Legacy endpoints (kept for backward compatibility)
 export const listKnowledgeSources = (): Promise<KnowledgeSource[]> => {
-  return apiClient.get(endpoints.knowledge.sources || '/v1/knowledge/sources')
+  return apiClient.get('/v1/knowledge/sources', { withAuth: false })
 }
 
 export const listKnowledgeDocuments = (): Promise<KnowledgeDocument[]> => {
-  return apiClient.get(endpoints.knowledge.documents || '/v1/knowledge/documents')
+  return apiClient.get('/v1/knowledge/documents', { withAuth: false })
 }

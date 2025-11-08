@@ -1,5 +1,5 @@
 import { Guide, AIGeneratedSuggestion } from '../types'
-import { getAISuggestion, getGuides } from './knowledgeService'
+import { getAISuggestion } from './knowledgeService'
 
 /**
  * Generate AI suggestion using the backend API (Gemini).
@@ -73,7 +73,7 @@ function _fallbackMockSuggestion(
 5. **Ripoti matukio yoyote ya shaka**: Ikiwa utagundua shughuli yoyote isiyo ya kawaida, ripoti mara moja kwa mamlaka husika.
 
 **Onyo**: Hii ni ushauri wa jumla. Kwa msaada maalum, wasiliana na mamlaka husika au mtaalamu wa usalama wa kidijitali.`,
-      related_guides: relatedGuides,
+      relatedGuides: relatedGuides,
     }
   }
 
@@ -92,7 +92,7 @@ function _fallbackMockSuggestion(
 5. **Report any suspicious activity**: If you notice any unusual activity, report it immediately to the relevant authorities.
 
 **Note**: This is general advice. For specific assistance, contact relevant authorities or a cybersecurity expert.`,
-    related_guides: relatedGuides,
+    relatedGuides: relatedGuides,
   }
 }
 
