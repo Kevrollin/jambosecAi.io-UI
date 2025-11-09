@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Send, User, X, Plus, MessageSquare, ChevronLeft, Shield, Menu, ChevronsLeft, ChevronsRight, ExternalLink, MoreVertical, Trash2, Edit2 } from "lucide-react";
+import { Send, User, X, Plus, MessageSquare, Shield, Menu, ChevronsLeft, ChevronsRight, ExternalLink, MoreVertical, Trash2, Edit2 } from "lucide-react";
 import { listChatSessions, askChat, listChatMessages, deleteChatSession, updateChatSessionTitle } from "../services/chatService";
 import type { ChatSession, ChatMessage } from "../types";
 import { useNavbar } from "../../../components/NavbarContext";
@@ -84,14 +84,6 @@ const ChatPageComponent = () => {
       document.documentElement.style.overflow = originalHtmlStyle;
     };
   }, []);
-  
-  // Draggable button positions
-  const [button1Pos, setButton1Pos] = useState({ x: 20, y: 100 });
-  const [button2Pos, setButton2Pos] = useState({ x: 20, y: 160 });
-  const [isDragging1, setIsDragging1] = useState(false);
-  const [isDragging2, setIsDragging2] = useState(false);
-  const [dragOffset1, setDragOffset1] = useState({ x: 0, y: 0 });
-  const [dragOffset2, setDragOffset2] = useState({ x: 0, y: 0 });
   
   // Get current session title
   const currentSession = sessions.find(s => s.id === currentSessionId);
@@ -186,92 +178,6 @@ const ChatPageComponent = () => {
     window.dispatchEvent(event);
     console.log('ChatPage: Language changed to', language, '- event dispatched');
   }, [language]);
-
-  // Drag handlers for floating buttons
-  const handleStartDrag1 = (clientX: number, clientY: number) => {
-    setIsDragging1(true);
-    setDragOffset1({
-      x: clientX - button1Pos.x,
-      y: clientY - button1Pos.y,
-    });
-  };
-
-  const handleStartDrag2 = (clientX: number, clientY: number) => {
-    setIsDragging2(true);
-    setDragOffset2({
-      x: clientX - button2Pos.x,
-      y: clientY - button2Pos.y,
-    });
-  };
-
-  const handleMouseDown1 = (e: React.MouseEvent) => {
-    e.preventDefault();
-    handleStartDrag1(e.clientX, e.clientY);
-  };
-
-  const handleMouseDown2 = (e: React.MouseEvent) => {
-    e.preventDefault();
-    handleStartDrag2(e.clientX, e.clientY);
-  };
-
-  const handleTouchStart1 = (e: React.TouchEvent) => {
-    e.preventDefault();
-    const touch = e.touches[0];
-    handleStartDrag1(touch.clientX, touch.clientY);
-  };
-
-  const handleTouchStart2 = (e: React.TouchEvent) => {
-    e.preventDefault();
-    const touch = e.touches[0];
-    handleStartDrag2(touch.clientX, touch.clientY);
-  };
-
-  useEffect(() => {
-    const updatePosition = (clientX: number, clientY: number) => {
-      if (isDragging1) {
-        setButton1Pos({
-          x: Math.max(0, Math.min(window.innerWidth - 48, clientX - dragOffset1.x)),
-          y: Math.max(0, Math.min(window.innerHeight - 48, clientY - dragOffset1.y)),
-        });
-      }
-      if (isDragging2) {
-        setButton2Pos({
-          x: Math.max(0, Math.min(window.innerWidth - 48, clientX - dragOffset2.x)),
-          y: Math.max(0, Math.min(window.innerHeight - 48, clientY - dragOffset2.y)),
-        });
-      }
-    };
-
-    const handleMouseMove = (e: MouseEvent) => {
-      updatePosition(e.clientX, e.clientY);
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-    e.preventDefault();
-      if (e.touches[0]) {
-        updatePosition(e.touches[0].clientX, e.touches[0].clientY);
-      }
-    };
-
-    const handleEnd = () => {
-      setIsDragging1(false);
-      setIsDragging2(false);
-    };
-
-    if (isDragging1 || isDragging2) {
-      document.addEventListener("mousemove", handleMouseMove);
-      document.addEventListener("mouseup", handleEnd);
-      document.addEventListener("touchmove", handleTouchMove, { passive: false });
-      document.addEventListener("touchend", handleEnd);
-    }
-
-    return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleEnd);
-      document.removeEventListener("touchmove", handleTouchMove);
-      document.removeEventListener("touchend", handleEnd);
-    };
-  }, [isDragging1, isDragging2, dragOffset1, dragOffset2]);
 
   // Typewriter effect for streaming message
   const displayedStreamingContent = useTypewriter(streamingContent, 20);
@@ -461,50 +367,6 @@ const ChatPageComponent = () => {
 
   return (
     <div className="flex h-full bg-gray-100 overflow-hidden w-full" style={{ height: '100%', maxHeight: '100%', minHeight: 0 }}>
-      {/* Floating Draggable Buttons - Mobile Only */}
-      <div className="md:hidden fixed z-[100]">
-        {/* Button 1 - Sidebar Toggle */}
-              <button 
-          onMouseDown={handleMouseDown1}
-          onTouchStart={handleTouchStart1}
-          onClick={() => {
-            if (!isDragging1) {
-              setSidebarOpen(!sidebarOpen);
-            }
-          }}
-          className="absolute w-12 h-12 bg-blue-600/90 backdrop-blur-md border border-white/30 rounded-full shadow-2xl flex items-center justify-center text-white hover:bg-blue-700/90 transition-all cursor-move active:cursor-grabbing touch-none select-none"
-          style={{
-            left: `${button1Pos.x}px`,
-            top: `${button1Pos.y}px`,
-            boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
-          }}
-          type="button"
-          aria-label="Toggle sidebar"
-        >
-          {sidebarOpen ? <X className="h-5 w-5" /> : <MessageSquare className="h-5 w-5" />}
-              </button>
-              
-        {/* Button 2 - New Chat */}
-        <button
-          onMouseDown={handleMouseDown2}
-          onTouchStart={handleTouchStart2}
-          onClick={() => {
-            if (!isDragging2) {
-              handleNewChat();
-            }
-          }}
-          className="absolute w-12 h-12 bg-blue-600/90 backdrop-blur-md border border-white/30 rounded-full shadow-2xl flex items-center justify-center text-white hover:bg-blue-700/90 transition-all cursor-move active:cursor-grabbing touch-none select-none"
-          style={{
-            left: `${button2Pos.x}px`,
-            top: `${button2Pos.y}px`,
-            boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
-          }}
-          type="button"
-          aria-label="New chat"
-        >
-          <Plus className="h-5 w-5" />
-        </button>
-      </div>
 
       {/* Sidebar Backdrop - Mobile Only */}
       {sidebarOpen && (
@@ -516,7 +378,7 @@ const ChatPageComponent = () => {
 
       {/* Collapsed Sidebar Icon Bar - Desktop Only (when collapsed) */}
       {sidebarCollapsed && (
-        <div className="hidden md:flex fixed left-0 top-0 w-16 h-screen bg-gray-900 z-[90] flex-col items-center p-2" style={{ height: '100vh' }}>
+        <div className="hidden md:flex fixed left-0 top-0 w-16 h-full bg-gray-900 z-[90] flex-col items-center p-2">
           <button
             onClick={() => setSidebarCollapsed(false)}
             className="mb-4 p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
@@ -558,12 +420,11 @@ const ChatPageComponent = () => {
       <div
         className={`${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } md:translate-x-0 fixed md:relative z-[90] md:z-auto w-[80%] md:transition-all md:duration-300 h-screen md:h-full flex flex-col transition-all duration-300 ease-in-out flex-shrink-0 ${
-          sidebarCollapsed ? "md:w-0 md:opacity-0 md:pointer-events-none md:overflow-hidden" : "md:w-64"
+        } md:translate-x-0 fixed md:relative z-[90] md:z-auto w-[85%] sm:w-[70%] md:w-64 md:transition-all md:duration-300 h-full md:h-full flex flex-col transition-all duration-300 ease-in-out flex-shrink-0 ${
+          sidebarCollapsed ? "md:w-0 md:opacity-0 md:pointer-events-none md:overflow-hidden" : ""
         }`}
         style={{
-          height: isMobile ? '100vh' : '100%',
-          minHeight: isMobile ? '100vh' : '100%',
+          maxWidth: isMobile ? '320px' : 'none',
           ...(sidebarCollapsed ? {} : {
             background: "linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)",
             backdropFilter: "blur(20px)",
@@ -578,21 +439,21 @@ const ChatPageComponent = () => {
           <div className="hidden md:block absolute inset-0 bg-gray-900 -z-10" />
         )}
         {/* Sidebar Header - Mobile Only */}
-        <div className="p-4 border-b border-white/20 bg-white/10 backdrop-blur-sm md:hidden">
+        <div className="p-4 border-b border-gray-200 bg-white md:hidden flex-shrink-0">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-semibold text-gray-900">Chats</h2>
+            <h2 className="text-lg font-bold text-gray-900">Chats</h2>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="p-2 rounded-lg hover:bg-white/20 transition-colors"
+              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
               type="button"
               aria-label="Close sidebar"
             >
-              <ChevronLeft className="h-5 w-5 text-gray-900" />
+              <X className="h-5 w-5 text-gray-700" />
             </button>
           </div>
           <button
             onClick={handleNewChat}
-            className="w-full flex items-center space-x-2 px-4 py-2.5 bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl hover:bg-white/30 transition-all text-gray-900 font-medium"
+            className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all font-medium shadow-sm"
           >
             <Plus className="h-4 w-4" />
             <span>{currentContent.newChat}</span>
@@ -625,11 +486,11 @@ const ChatPageComponent = () => {
         {/* Chat History - Desktop Expanded */}
         {!sidebarCollapsed && (
           <>
-            <div className="flex-1 overflow-y-auto p-2">
+            <div className="flex-1 overflow-y-auto p-2 md:p-2" style={{ WebkitOverflowScrolling: 'touch' }}>
               {loadingSessions ? (
-                <div className="text-gray-400 text-sm text-center py-4">Loading...</div>
+                <div className="text-gray-500 md:text-gray-400 text-sm text-center py-4">Loading...</div>
               ) : sessions.length === 0 ? (
-                <div className="text-gray-400 text-sm text-center py-4 px-2">
+                <div className="text-gray-500 md:text-gray-400 text-sm text-center py-4 px-2">
                   {currentContent.noChats}
                 </div>
               ) : (
@@ -639,8 +500,8 @@ const ChatPageComponent = () => {
                       key={session.id}
                       className={`group relative flex items-center rounded-lg transition-all ${
                         currentSessionId === session.id
-                          ? "bg-gray-800 text-white"
-                          : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                          ? "bg-blue-600 md:bg-gray-800 text-white"
+                          : "bg-gray-100 md:bg-transparent text-gray-700 md:text-gray-300 hover:bg-gray-200 md:hover:bg-gray-800 md:hover:text-white"
                       }`}
                     >
                       <button
@@ -651,9 +512,9 @@ const ChatPageComponent = () => {
                         <span className="text-sm truncate">{session.title || "New Chat"}</span>
                       </button>
                       
-                      {/* Three dots menu button */}
+                      {/* Three dots menu button - Desktop Only */}
                       <div 
-                        className="relative flex-shrink-0"
+                        className="hidden md:block relative flex-shrink-0"
                         ref={(el) => {
                           if (el) {
                             menuRefs.current.set(session.id, el);
@@ -725,13 +586,80 @@ const ChatPageComponent = () => {
 
       {/* Main Chat Area */}
       <div 
-        className="flex-1 flex flex-col transition-all duration-300 ease-in-out min-w-0 relative" 
+        className="flex-1 flex flex-col transition-all duration-300 ease-in-out min-w-0 relative bg-gray-50" 
         style={{ 
-          height: isMobile ? '100vh' : '100%',
-          maxHeight: isMobile ? '100vh' : '100%',
           minHeight: 0,
         }}
       >
+        {/* Mobile Header - Always Visible on Mobile (Similar to Knowledge Hub) */}
+        <div className="md:hidden border-b border-gray-200 bg-white sticky top-0 z-40 flex-shrink-0" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
+          <div className="px-4 py-3 sm:py-4" style={{ paddingTop: 0 }}>
+            <div className="flex items-center justify-between gap-3">
+              {/* Left: Menu Button + Logo + Title */}
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                {/* Sidebar Toggle Button */}
+                <button
+                  onClick={() => setSidebarOpen(!sidebarOpen)}
+                  className="inline-flex items-center justify-center p-2 rounded-lg text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors flex-shrink-0"
+                  aria-label="Toggle sidebar"
+                  type="button"
+                >
+                  <Menu className="h-6 w-6" />
+                </button>
+
+                {/* Logo and Title */}
+                <div className="flex items-center space-x-2 flex-1 min-w-0">
+                  <div className="bg-blue-600 p-1.5 rounded-lg flex-shrink-0">
+                    <Shield className="h-5 w-5 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h1 className="text-base font-bold text-gray-900 truncate">JamboSec</h1>
+                    <p className="text-xs text-gray-600 truncate">{currentChatTitle}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right: Navigation Menu Button */}
+              <button
+                onClick={toggleMobileMenu}
+                className="inline-flex items-center justify-center p-2 rounded-lg text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors flex-shrink-0"
+                aria-label="Open navigation menu"
+                type="button"
+              >
+                <svg
+                  className="h-6 w-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop Top Bar */}
+        <div className="hidden md:flex bg-white/95 backdrop-blur-sm border-b border-gray-200/50 px-6 lg:px-24 py-3 items-center justify-between flex-shrink-0 relative z-10">
+          {/* Left side - Logo and Title */}
+          <div className="flex items-center space-x-3 flex-1 min-w-0">
+            {/* Logo */}
+            <div className="bg-blue-600 p-2 rounded-lg flex-shrink-0">
+              <Shield className="h-5 w-5 text-white" />
+            </div>
+            {/* Title */}
+            <div className="flex-1 min-w-0">
+              <h1 className="text-lg font-bold text-gray-900 truncate">JamboSec</h1>
+              <p className="text-sm text-gray-600 truncate">{currentChatTitle}</p>
+            </div>
+          </div>
+        </div>
+
         {/* Decorative Background Blobs */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-0 left-1/4 w-64 h-64 md:w-96 md:h-96 bg-blue-200/20 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
@@ -739,33 +667,8 @@ const ChatPageComponent = () => {
           <div className="absolute -bottom-32 left-1/3 w-64 h-64 md:w-96 md:h-96 bg-blue-100/20 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
         </div>
 
-        {/* Top Bar */}
-        <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200/50 px-4 md:px-24 py-3 flex items-center justify-between flex-shrink-0 relative z-10">
-          {/* Left side - Logo and Title */}
-          <div className="flex items-center space-x-2 flex-1 min-w-0">
-            {/* Logo */}
-            <div className="bg-blue-600 p-1 rounded-md flex-shrink-0">
-              <Shield className="h-4 w-4 text-white" />
-            </div>
-            {/* Title */}
-            <h1 className="text-sm font-normal text-gray-900 truncate flex-1 min-w-0">
-              {currentChatTitle}
-            </h1>
-          </div>
-
-          {/* Right side - Mobile Menu Button */}
-          <button
-            onClick={toggleMobileMenu}
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 flex-shrink-0"
-            type="button"
-            aria-label="Open menu"
-          >
-            <Menu className="h-5 w-5 text-gray-700" />
-          </button>
-        </div>
-
         {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto px-4 py-6 md:px-6 md:py-8 relative z-10" style={{ minHeight: 0 }}>
+        <div className="flex-1 overflow-y-auto px-3 py-4 sm:px-4 sm:py-6 md:px-6 md:py-8 relative z-10" style={{ minHeight: 0, WebkitOverflowScrolling: 'touch' }}>
           {/* Background decorations */}
           <div className="absolute inset-0 overflow-hidden">
             <div className="absolute top-0 left-1/4 w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 lg:w-96 lg:h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
@@ -804,16 +707,16 @@ const ChatPageComponent = () => {
                       className={`flex-1 ${
                         msg.role === "user" ? "flex justify-end" : ""
                       }`}
-                      style={{ maxWidth: '85%' }}
+                      style={{ maxWidth: 'calc(100% - 60px)', minWidth: 0 }}
                     >
                       <div
-                        className={`rounded-2xl px-4 py-3 md:px-5 md:py-4 shadow-sm ${
+                        className={`rounded-2xl px-3 py-2.5 sm:px-4 sm:py-3 md:px-5 md:py-4 shadow-sm ${
                           msg.role === "user"
                             ? "bg-gradient-to-br from-blue-600 to-blue-700 text-white"
-                            : "bg-white/90 backdrop-blur-sm border border-gray-200/50 text-gray-900"
+                            : "bg-white border border-gray-200 text-gray-900"
                         }`}
                       >
-                        <p className="text-sm md:text-base leading-relaxed whitespace-pre-wrap">
+                        <p className="text-sm sm:text-base leading-relaxed whitespace-pre-wrap break-words">
                           {msg.content}
                         </p>
                         
@@ -862,9 +765,9 @@ const ChatPageComponent = () => {
                     <div className="hidden md:flex flex-shrink-0 w-9 h-9 md:w-10 md:h-10 rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 items-center justify-center shadow-md">
                       <Shield className="h-5 w-5 md:h-6 md:w-6 text-white" />
                     </div>
-                    <div className="flex-1" style={{ maxWidth: '85%' }}>
-                      <div className="bg-white/90 backdrop-blur-sm border border-gray-200/50 rounded-2xl px-4 py-3 md:px-5 md:py-4 shadow-sm">
-                        <p className="text-sm md:text-base leading-relaxed whitespace-pre-wrap">
+                    <div className="flex-1" style={{ maxWidth: 'calc(100% - 60px)', minWidth: 0 }}>
+                      <div className="bg-white border border-gray-200 rounded-2xl px-3 py-2.5 sm:px-4 sm:py-3 md:px-5 md:py-4 shadow-sm">
+                        <p className="text-sm sm:text-base leading-relaxed whitespace-pre-wrap break-words">
                           {displayedStreamingContent}
                           <span className="inline-block w-2 h-4 bg-blue-600 animate-pulse ml-1">|</span>
                         </p>
@@ -879,7 +782,7 @@ const ChatPageComponent = () => {
                     <div className="hidden md:flex flex-shrink-0 w-9 h-9 md:w-10 md:h-10 rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 items-center justify-center shadow-md">
                       <Shield className="h-5 w-5 md:h-6 md:w-6 text-white" />
                     </div>
-                    <div className="bg-white/90 backdrop-blur-sm border border-gray-200/50 rounded-2xl px-4 py-3 md:px-5 md:py-4 shadow-sm">
+                    <div className="bg-white border border-gray-200 rounded-2xl px-3 py-2.5 sm:px-4 sm:py-3 md:px-5 md:py-4 shadow-sm">
                       <p className="text-sm text-gray-600 italic mb-2">
                         {language === 'sw' ? 'JamboSec anafikiria...' : 'JamboSec is thinking...'}
                       </p>
@@ -898,7 +801,7 @@ const ChatPageComponent = () => {
         </div>
 
         {/* Input Area */}
-        <div className="bg-white/80 backdrop-blur-sm border-t border-gray-200/50 px-4 py-4 md:py-5 flex-shrink-0 relative z-10">
+        <div className="bg-white border-t border-gray-200 px-3 py-3 sm:px-4 sm:py-4 md:py-5 flex-shrink-0 relative z-10" style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
           <div className="max-w-4xl mx-auto">
             <form onSubmit={handleSend} className="relative">
               <textarea
@@ -914,18 +817,18 @@ const ChatPageComponent = () => {
                     handleSend(e);
                   }
                 }}
-                className="w-full px-4 py-3 md:px-5 md:py-4 pr-12 md:pr-14 border border-gray-300/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 resize-none text-sm md:text-base disabled:opacity-50 bg-white/90 backdrop-blur-sm shadow-sm"
+                className="w-full px-3 py-2.5 sm:px-4 sm:py-3 md:px-5 md:py-4 pr-10 sm:pr-12 md:pr-14 border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 resize-none text-sm sm:text-base disabled:opacity-50 bg-white shadow-sm"
                 style={{ maxHeight: "200px" }}
               />
               <button
                 type="submit"
                 disabled={!input.trim() || loading}
-                className="absolute right-2 md:right-3 bottom-2 md:bottom-3 p-2 md:p-2.5 bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg"
+                className="absolute right-1.5 sm:right-2 md:right-3 bottom-1.5 sm:bottom-2 md:bottom-3 p-1.5 sm:p-2 md:p-2.5 bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-lg sm:rounded-xl hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg"
               >
-                <Send className="h-4 w-4 md:h-5 md:w-5" />
+                <Send className="h-4 w-4 sm:h-4 sm:w-4 md:h-5 md:w-5" />
               </button>
             </form>
-            <p className="text-xs text-gray-500 mt-2 text-center">
+            <p className="text-xs text-gray-500 mt-1.5 sm:mt-2 text-center hidden sm:block">
               Press Enter to send, Shift+Enter for new line
             </p>
           </div>

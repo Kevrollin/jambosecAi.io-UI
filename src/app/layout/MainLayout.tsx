@@ -7,9 +7,9 @@ export const MainLayout = () => {
   const isChatPage = location.pathname === paths.chat.root
 
   return (
-    <div className={`${isChatPage ? 'h-screen overflow-hidden flex flex-col' : 'min-h-screen'} bg-gray-50`} style={isChatPage ? { height: '100vh', maxHeight: '100vh' } : {}}>
+    <div className={`${isChatPage ? 'h-screen overflow-hidden flex flex-col' : 'min-h-screen'} bg-gray-50`} style={isChatPage ? { height: '100dvh', maxHeight: '100dvh' } : {}}>
       <AuthenticatedNavbar />
-      <main className={isChatPage ? 'flex-1 overflow-hidden min-h-0 flex flex-col' : ''}>
+      <main className={isChatPage ? 'flex-1 overflow-hidden min-h-0 flex flex-col' : 'flex-1'}>
         <Outlet />
       </main>
     </div>
